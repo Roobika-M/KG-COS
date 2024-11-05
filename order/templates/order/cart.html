@@ -3,44 +3,86 @@
 {% block maincontent %}
 
 <style>
+    .content-area {
+        padding: 0;
+        margin: 0;
+        background-color: white;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
     body {
-        background-color: #f8f9fa; /* Light background for a fresh look */
+        background-color: #f8f9fa;
     }
     .card {
-        border-radius: 15px; /* Rounded card corners */
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     }
     .card-title {
-        font-weight: bold; /* Emphasize card titles */
-        font-size: 1.25rem; /* Increase font size for titles */
-    }
-    .border-primary {
-        border-color: #007bff !important; /* Primary color border */
+        font-weight: bold;
+        font-size: 1.25rem;
     }
     .btn {
-        border-radius: 10px; /* Rounded button corners */
+        border-radius: 10px;
     }
     .total-amount {
-        font-size: 1.5rem; /* Larger font for total amount */
-        color: #28a745; /* Green color for total amount */
-        font-weight: bold; /* Make it bold */
+        font-size: 1.5rem;
+        color: #28a745;
+        font-weight: bold;
     }
     .alert {
-        border-radius: 10px; /* Rounded alert corners */
+        border-radius: 10px;
+    }
+
+    /* Responsive Styling */
+    .container {
+        max-width: 100%;
+    }
+    .card-body {
+        padding: 1rem;
+    }
+    .card img {
+        width: 100%;
+        height: auto;
+    }
+
+    /* Media Queries */
+    @media (max-width: 767px) {
+        .container {
+            padding: 0 1rem;
+        }
+        .col-md-8, .col-md-4 {
+            max-width: 100%;
+        }
+        .card img {
+            width: 100%;
+            height: auto;
+        }
+        .card-body {
+            padding: 0.5rem;
+        }
+        .card .btn {
+            font-size: 0.85rem;
+            padding: 0.5rem;
+        }
+        .price-quantity {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
     }
 </style>
 
 <div class="container mt-5">
     {% if cartitems %}
-        <div class="row border rounded-5 border-primary m-3 p-4 bg-white">
+        <div class="row m-3">
             <div class="col-12 col-md-8">
                 {% for item in cartitems %}
                     <div class="card mb-3">
                         <div class="row g-0">
-                            <div class="col-4 col-md-4">
-                                <img src="{{item.food.image.url}}" class="img-fluid rounded-start" style="height: 180px; width: 100%; object-fit: cover;">
+                            <div class="col-12 col-md-4">
+                                <img src="{{item.food.image.url}}" class="img-fluid rounded-start" style="height: 180px; object-fit: cover;">
                             </div>
-                            <div class="col-8 col-md-8">
+                            <div class="col-12 col-md-8">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div>
@@ -51,14 +93,14 @@
                                             <a class="btn btn-danger" href="{% url 'update-cart' item.food.id %}?name=delete_cart_item"><i class="fa-solid fa-trash"></i></a>
                                         </div>
                                     </div>
-                                    <div class="d-flex justify-content-between text-center mt-2">
-                                        <div class="border rounded p-2 flex-grow-1 mx-1">
+                                    <div class="d-flex justify-content-between text-center mt-2 price-quantity">
+                                        <div class="border rounded p-2 mx-1" style="flex: 1;">
                                             <h5 class="card-title border-bottom m-1">Price</h5>
                                             <h5 class="card-title">{{item.food.price | title}}</h5>
                                         </div>
-                                        <div class="border rounded p-2 flex-grow-1 mx-1">
+                                        <div class="border rounded p-2 mx-1" style="flex: 1; display: flex; align-items: center; justify-content: center;">
                                             <h5 class="card-title border-bottom m-1">Quantity</h5>
-                                            <div class="d-flex align-items-center justify-content-center">
+                                            <div class="d-flex align-items-center justify-content-center mx-2">
                                                 {% if item.quantity == 1 %}
                                                     <a class="btn btn-danger" href="{% url 'update-cart' item.food.id %}?name=delete_cart_item"><i class="fa-solid fa-trash"></i></a>
                                                 {% else %}
@@ -68,10 +110,10 @@
                                                 <a class="btn btn-primary" href="{% url 'update-cart' item.food.id %}?name=increase_cart"><i class="fa-solid fa-plus"></i></a>
                                             </div>
                                         </div>
-                                        <div class="border rounded p-2 flex-grow-1 mx-1">
-                                            <h5 class="card-title border-bottom m-1">Amount</h5>
-                                            <h5 class="card-title m-1">{% widthratio item.food.price 1 item.quantity %}</h5>
-                                        </div>
+                                    </div>
+                                    <div class="border rounded p-2 mx-1 mt-2">
+                                        <h5 class="card-title border-bottom m-1">Amount</h5>
+                                        <h5 class="card-title m-1">{% widthratio item.food.price 1 item.quantity %}</h5>
                                     </div>
                                 </div>
                             </div>
@@ -79,81 +121,48 @@
                     </div>
                 {% endfor %}
             </div>
+            <!-- Payment Section -->
             <div class="col-12 col-md-4">
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h3 class="border-bottom">Total Amount:</h3>
-                        <ul class="list-group">
-                            {% for item in cartitems %}
-                                <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 pb-0">{{item.food.name}}
-                                    <span>{% widthratio item.food.price 1 item.quantity %}</span>
-                                </li>
-                            {% endfor %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center border-0 border-top px-0 mb-3 mt-3">
-                                <strong>Total</strong>
-                                <strong class="total-amount">{{total_amount}}</strong>
-                            </li>
-                        </ul>
-                        <div class="d-grid">
-                            <form action="/checkout/" method="post" id="paypalform">
-                                {% csrf_token %}
-                                <input type="hidden" name="paymode" value="Online">
-                                <input type="hidden" name="paygate" value="Paypal">
-                                <div id="paypal-button-container"></div>
-                            </form>
-                            <form action="/checkout/" method="post" id="cashform">
-                                {% csrf_token %}
-                                <input type="hidden" name="paymode" value="Cash">
-                                <div class="d-grid">
-                                    <input type="submit" class="btn btn-primary p-2 fw-semibold" value="Pay Cash On Delivery">
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                <div class="mt-3">
+                    <h5 class="total-amount">Total Amount: {{ total_amount }}</h5>
                 </div>
-                <h5 class="alert alert-warning text-center mt-3 p-2 border border-warning border-3">Note: You Can Collect Your Order from Canteen When <strong>Status</strong> is <strong>Packed</strong> in <a href="{% url 'my-orders' %}">My Orders</a> Page</h5>
+                <div id="paypal-button-container" class="mt-3"></div>
+                <form id="paypalform" method="post" style="display: none;">
+                    {% csrf_token %}
+                </form>
             </div>
         </div>
-    </div>
-    <div id="os"></div>
-{% else %}
-    <h1 class="alert alert-info text-center mt-5">Your Cart is Empty</h1>
-{% endif %}
+    {% else %}
+        <div class="alert alert-info">Your cart is empty.</div>
+    {% endif %}
+</div>
 
-{% endblock maincontent %}
-
-{% block payment-gateway %}
-<script src="https://www.paypal.com/sdk/js?client-id=AdstVdkXtBT7eFeAKT1PuFTYmnm3a9HgAeyqXiJtxNKFQJav05K7ljkgv6e1EbefJo_crAAgYXsElPcf&currency=USD"></script>
-
+<script src="https://www.paypal.com/sdk/js?client-id=YOUR_CLIENT_ID&currency=USD"></script>
 <script>
-    // Render the PayPal button into #paypal-button-container
-    paypal.Buttons({
-        // Set up the transaction
-        createOrder: function(data, actions) {
-            return actions.order.create({
-                purchase_units: [{
-                    amount: {
-                        value: '{{total_amount}}'
-                    }
-                }]
-            });
-        },
+paypal.Buttons({
+    createOrder: function(data, actions) {
+        return actions.order.create({
+            purchase_units: [{
+                amount: {
+                    value: '{{ total_amount }}'
+                }
+            }]
+        });
+    },
+    onApprove: function(data, actions) {
+        return actions.order.capture().then(function(orderData) {
+            var transaction = orderData.purchase_units[0].payments.captures[0];
+            alert('Transaction ' + transaction.status + ': ' + transaction.id + '\n\nOrder Placed Successfully' + '\nClick OK to Proceed Further');
 
-        // Finalize the transaction
-        onApprove: function(data, actions) {
-            return actions.order.capture().then(function(orderData) {
-                var transaction = orderData.purchase_units[0].payments.captures[0];
-                alert('Transaction '+ transaction.status + ': ' + transaction.id + '\n\nOrder Placed Successfully' + '\nClick OK to Proceed Further');
-
-                var form = document.getElementById('paypalform');
-                var hidnInp = document.createElement("input");
-                hidnInp.setAttribute('type', 'hidden');
-                hidnInp.setAttribute('name', 'tn_id');
-                hidnInp.setAttribute('value', transaction.id);
-                form.appendChild(hidnInp);
-                document.getElementById('paypalform').submit();
-            });
-        }
-    }).render('#paypal-button-container');
+            var form = document.getElementById('paypalform');
+            var hiddenInput = document.createElement("input");
+            hiddenInput.setAttribute('type', 'hidden');
+            hiddenInput.setAttribute('name', 'tn_id');
+            hiddenInput.setAttribute('value', transaction.id);
+            form.appendChild(hiddenInput);
+            document.getElementById('paypalform').submit();
+        });
+    }
+}).render('#paypal-button-container');
 </script>
-{% endblock payment-gateway %}
+{% endblock maincontent %}
